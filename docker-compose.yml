@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  crawler:
+    build: .
+    container_name: crawler-service
+    restart: unless-stopped
+    ports:
+      - "12315:12315"
+    volumes:
+      # 挂载状态文件目录，防止容器重启后丢失
+      - ./data:/data
+      # 可选：挂载配置文件或日志目录
+      # - ./logs:/app/logs
+    environment:
+      - TZ=Asia/Shanghai
+      # 如果需要通过环境变量配置，可以在这里设置
+      # - NOTIFY_WECHAT_KEY=xxxx
+    # 确保只有一个实例运行（如果使用 docker swarm 或 k8s，可设置 replicas=1）
