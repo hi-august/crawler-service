@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from app.core.http_client import httpx_post
 
-NOTIFY_SERVICE_URL = "http://192.168.32.103:12316/notify?authorize_user=august"
+NOTIFY_SERVICE_URL = "http://192.168.32.99:12316/notify?authorize_user=august"
 
 
 def notify_wechat(msg: str, strategy_type: str = 'others', touser: List[str] = None):
