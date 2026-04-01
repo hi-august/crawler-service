@@ -120,13 +120,14 @@ async def options_api():
 @app.get("/{path:path}")
 async def serve_static(path: str):
     """提供静态文件服务（用于 HTML、CSS、JS 等）"""
-    if os.path.exists(path):
+    file_path = os.path.join(os.getcwd(), path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
         return FileResponse(
-            path=path,
+            path=file_path,
             headers={'Access-Control-Allow-Origin': '*'}
         )
     else:
-        return Response("File not found", status_code=404)
+        return Response(f"File not found: {file_path}", status_code=404)
 
 @app.options("/{path:path}")
 async def options_static():
