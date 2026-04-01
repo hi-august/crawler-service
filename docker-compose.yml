@@ -8,6 +8,8 @@ services:
     volumes:
       # 挂载状态文件目录，防止容器重启后丢失
       - ./data:/data
+      # 挂载 tabler 静态文件目录
+      - ./tabler:/app/tabler
       # 可选：挂载配置文件或日志目录
       # - ./logs:/app/logs
     environment:

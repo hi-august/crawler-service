@@ -49,6 +49,7 @@ app = FastAPI(
 
 # 挂载静态文件目录（用于直接访问静态资源）
 app.mount("/static", StaticFiles(directory="."), name="static")
+app.mount("/tabler", StaticFiles(directory="tabler"), name="tabler")
 
 # ====================== 小嘀咕爬虫相关路由 ======================
 @app.get("/")
