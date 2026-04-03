@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="基金溢价数据实时监控">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>基金溢价数据</title>
-    <!-- 本地资源 -->
+    
+    <link rel="dns-prefetch" href="//192.168.32.99">
+    <link rel="preconnect" href="http://192.168.32.99:12316">
+    
+    <link rel="preload" href="tabler/tabler.min.css" as="style">
+    <link rel="preload" href="tabler/font-awesome.min.css" as="style">
+    <link rel="preload" href="tabler/tabler.min.js" as="script">
+    
     <link rel="stylesheet" href="tabler/tabler.min.css">
     <link rel="stylesheet" href="tabler/font-awesome.min.css">
     <style>
@@ -258,7 +267,7 @@
         }
         
         .table-hover tbody tr {
-            transition: all 0.2s ease;
+            transition: background-color 0.15s ease;
         }
         
         .table-hover tbody tr:nth-child(even) {
@@ -271,10 +280,6 @@
         
         .table-hover tbody tr:hover {
             background-color: var(--row-hover-bg);
-        }
-        
-        .table-hover tbody tr {
-            transition: background-color 0.15s ease;
         }
         
         .card-footer {
@@ -590,23 +595,52 @@
         const PAGE_SIZE = 18;
         let currentPage = 1;
         const CACHE_KEY = 'fund_data_cache';
-        const CACHE_DURATION = 1 * 60 * 1000; // 1分钟缓存
+        const CACHE_DURATION = 1 * 30 * 1000;
+        
+        const elements = {};
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // 尝试从缓存加载数据
+            cacheElements();
             loadFromCache();
-            // 同时请求新数据
             fetchFundData();
             setupEventListeners();
         });
+        
+        function cacheElements() {
+            elements.searchInput = document.getElementById('search-input');
+            elements.searchBtn = document.getElementById('search-btn');
+            elements.tableBody = document.getElementById('fund-table-body');
+            elements.pagination = document.getElementById('pagination');
+            elements.loadingStatus = document.getElementById('loading-status');
+            elements.loadingOverlay = document.getElementById('loading-overlay');
+        }
 
         function setupEventListeners() {
-            document.getElementById('search-btn').addEventListener('click', function() {
-                const searchTerm = document.getElementById('search-input').value.trim();
+            elements.searchBtn.addEventListener('click', function() {
+                const searchTerm = elements.searchInput.value.trim();
                 searchFunds(searchTerm);
             });
             
-            document.getElementById('search-input').addEventListener('keypress', function(e) {
+            const debouncedSearch = debounce(function(e) {
+                const searchTerm = e.target.value.trim();
+                searchFunds(searchTerm);
+            }, 300);
+            
+            elements.searchInput.addEventListener('input', debouncedSearch);
+            
+            elements.searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     const searchTerm = this.value.trim();
                     searchFunds(searchTerm);
@@ -622,11 +656,11 @@
         }
 
         function showLoading() {
-            document.getElementById('loading-overlay').classList.add('active');
+            elements.loadingOverlay.classList.add('active');
         }
 
         function hideLoading() {
-            document.getElementById('loading-overlay').classList.remove('active');
+            elements.loadingOverlay.classList.remove('active');
         }
 
         function saveToCache(data) {
@@ -650,9 +684,8 @@
                     if (now - parsedData.timestamp < CACHE_DURATION) {
                         fundData = parsedData.data;
                         renderTable(fundData);
-                        const loadingStatus = document.getElementById('loading-status');
-                        loadingStatus.textContent = `共 ${fundData.length} 条 (缓存)`;
-                        loadingStatus.className = 'text-success';
+                        elements.loadingStatus.textContent = `共 ${fundData.length} 条 (缓存)`;
+                        elements.loadingStatus.className = 'text-success';
                         return true;
                     }
                 }
@@ -663,9 +696,8 @@
         }
 
         async function fetchFundData() {
-            const loadingStatus = document.getElementById('loading-status');
-            loadingStatus.textContent = '加载中...';
-            loadingStatus.className = 'text-muted';
+            elements.loadingStatus.textContent = '加载中...';
+            elements.loadingStatus.className = 'text-muted';
 
             try {
                 showLoading();
@@ -674,19 +706,17 @@
                 
                 if (data.code === 0 && data.data) {
                     fundData = data.data;
-                    // 保存到缓存
                     saveToCache(fundData);
                     renderTable(fundData);
-                    loadingStatus.textContent = `共 ${fundData.length} 条`;
-                    loadingStatus.className = 'text-success';
+                    elements.loadingStatus.textContent = `共 ${fundData.length} 条`;
+                    elements.loadingStatus.className = 'text-success';
                 } else {
                     throw new Error('数据格式错误');
                 }
             } catch (error) {
                 console.error('获取数据失败:', error);
-                loadingStatus.textContent = '加载失败';
-                loadingStatus.className = 'text-danger';
-                // 如果缓存加载失败，尝试重新加载
+                elements.loadingStatus.textContent = '加载失败';
+                elements.loadingStatus.className = 'text-danger';
                 if (!fundData.length) {
                     loadFromCache();
                 }
@@ -696,7 +726,6 @@
         }
 
         function renderTable(data) {
-            const tableBody = document.getElementById('fund-table-body');
             const fragment = document.createDocumentFragment();
             
             const start = (currentPage - 1) * PAGE_SIZE;
@@ -719,17 +748,16 @@
                 fragment.appendChild(row);
             });
             
-            tableBody.innerHTML = '';
-            tableBody.appendChild(fragment);
+            elements.tableBody.innerHTML = '';
+            elements.tableBody.appendChild(fragment);
             
             updatePagination(data.length);
         }
         
         function updatePagination(totalItems) {
             const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-            const paginationDiv = document.getElementById('pagination');
             
-            paginationDiv.innerHTML = `
+            elements.pagination.innerHTML = `
                 <div class="d-flex align-items-center space-x-4">
                     <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})" class="btn btn-sm btn-outline-secondary">
                         上一页
