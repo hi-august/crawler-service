@@ -27,17 +27,17 @@ state_mgr = StateManager()
 async def lifespan(app: FastAPI):
     """应用生命周期管理，启动和停止定时调度器"""
     # 启动时加载状态已在 StateManager 初始化时完成
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(
-        xiaodigu.crawl,
-        trigger=IntervalTrigger(seconds=CRAWLER_INTERVAL_SECONDS),
-        id='xiaodigu_crawler',
-        replace_existing=True
-    )
-    scheduler.start()
+    # scheduler = BackgroundScheduler()
+    # scheduler.add_job(
+    #     xiaodigu.crawl,
+    #     trigger=IntervalTrigger(seconds=CRAWLER_INTERVAL_SECONDS),
+    #     id='xiaodigu_crawler',
+    #     replace_existing=True
+    # )
+    # scheduler.start()
     cron_log.info(f"调度器已启动，每{CRAWLER_INTERVAL_SECONDS}秒执行一次小嘀咕爬虫")
     yield
-    scheduler.shutdown()
+    # scheduler.shutdown()
     cron_log.info("应用关闭，调度器已停止")
 
 
@@ -48,8 +48,7 @@ app = FastAPI(
 )
 
 # 挂载静态文件目录（用于直接访问静态资源）
-app.mount("/static", StaticFiles(directory="."), name="static")
-app.mount("/tabler", StaticFiles(directory="tabler"), name="tabler")
+app.mount("/pages", StaticFiles(directory="pages"), name="pages")
 
 # ====================== 小嘀咕爬虫相关路由 ======================
 @app.get("/")
@@ -147,6 +146,6 @@ if __name__ == "__main__":
     print(f"服务运行在 http://localhost:{SERVICE_PORT}")
     print(f"爬虫状态: http://localhost:{SERVICE_PORT}/status")
     print(f"手动触发爬虫: http://localhost:{SERVICE_PORT}/run")
-    print(f"前端页面: http://localhost:{SERVICE_PORT}/fund_table_optimized.html")
+    print(f"前端页面: http://localhost:{SERVICE_PORT}/pages/lof.html")
     print(f"API 代理示例: http://localhost:{SERVICE_PORT}/api/today_rt?authorize_user=august&is_filtered=0")
     uvicorn.run(app, host=SERVICE_HOST, port=SERVICE_PORT)

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="基金历史溢价">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>基金历史溢价</title>
+    
+    <link rel="dns-prefetch" href="//192.168.32.99">
+    <link rel="preconnect" href="http://192.168.32.99:12316">
+    
+    <link rel="preload" href="tabler/tabler.min.css" as="style">
+    <link rel="preload" href="tabler/font-awesome.min.css" as="style">
+    <link rel="preload" href="tabler/tabler.min.js" as="script">
+    
+    <link rel="stylesheet" href="tabler/tabler.min.css">
+    <link rel="stylesheet" href="tabler/font-awesome.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #64748b;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --border-color: #e5e7eb;
+            --text-color: #1e293b;
+            --text-muted: #6b7280;
+            --row-even-bg: #f9fafb;
+            --row-hover-bg: #f1f5f9;
+            --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+        
+        .container-fluid {
+            padding: 10px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        @media (min-width: 768px) {
+            .container-fluid {
+                padding: 20px 30px;
+            }
+        }
+        
+        .page-header {
+            margin-bottom: 2px;
+            text-align: center;
+        }
+        
+        .fund-info {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            line-height: 1.112;
+        }
+        
+        .fund-info h2 {
+            margin: 0 0 6px 0;
+            font-size: 18px;
+            color: var(--text-color);
+            margin-right: 12px;
+            line-height: 1.112;
+        }
+        
+        .fund-info small {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.112;
+        }
+        
+        .fund-info .stat-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .fund-info .stat-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            line-height: 1.112;
+        }
+        
+        .fund-info .stat-label {
+            font-weight: 500;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+        
+        .fund-info .stat-value {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-left: 4px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 3px;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .card-body {
+            padding: 0;
+        }
+        
+        .table-responsive {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0;
+            font-size: 14px;
+            table-layout: fixed;
+        }
+        
+        @media (min-width: 768px) {
+            .table {
+                font-size: 16px;
+            }
+            
+            .card-footer {
+                padding: 15px 25px;
+            }
+        }
+        
+        .table th {
+            background-color: var(--card-background);
+            font-weight: 600;
+            padding: 10px 4px;
+            text-align: center;
+            white-space: nowrap;
+            font-size: 12px;
+            letter-spacing: 0.01em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        @media (min-width: 768px) {
+            .table th {
+                padding: 10px 8px;
+                font-size: 15px;
+            }
+        }
+        
+        .table th:first-child {
+            text-align: center;
+        }
+        
+        .table th:hover {
+            background-color: var(--row-hover-bg);
+        }
+        
+        .table td {
+            padding: 7px 4px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background-color 0.15s ease;
+            font-weight: 400;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .table td {
+                padding: 10px 8px;
+            }
+        }
+        
+        .table-hover tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        
+        .table-hover tbody tr:nth-child(even) {
+            background-color: var(--row-even-bg);
+        }
+        
+        .table-hover tbody tr:nth-child(odd) {
+            background-color: var(--card-background);
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: var(--row-hover-bg);
+        }
+        
+        .card-footer {
+            background-color: var(--card-background);
+            padding: 10px 16px;
+            font-size: 13px;
+            border-top: 1px solid var(--border-color);
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        .text-success {
+            color: var(--success-color) !important;
+            font-weight: 600;
+        }
+        
+        .text-danger {
+            color: var(--danger-color) !important;
+            font-weight: 600;
+        }
+        
+        .table-responsive {
+            overflow-x: hidden;
+        }
+        
+        @media (max-width: 480px) {
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        
+        #loading-status {
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .pagination {
+            font-size: 13px;
+        }
+        
+        .btn {
+            font-size: 13px;
+            padding: 8px 18px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .space-x-2 > * + * {
+            margin-left: 12px;
+        }
+        
+        .d-flex {
+            display: flex;
+        }
+        
+        .justify-content-between {
+            justify-content: space-between;
+        }
+        
+        .align-items-center {
+            align-items: center;
+        }
+        
+        .text-sm {
+            font-size: 13px;
+        }
+        
+        .mt-1 {
+            margin-top:3px !important;
+        }
+        
+        .text-muted {
+            color: var(--text-muted);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 15px;
+            }
+            
+            .card {
+                margin-bottom: 20px;
+            }
+            
+            .table th,
+            .table td {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .card-footer {
+                padding: 16px;
+            }
+            
+            .btn {
+                padding: 6px 16px;
+                font-size: 12px;
+            }
+            
+            .fund-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .fund-info .stat-group {
+                justify-content: center;
+            }
+        }
+        
+        .table th:nth-child(1) {
+            width: 90px;
+        }
+        
+        .table th:nth-child(2) {
+            width: 60px;
+        }
+        
+        .table th:nth-child(3) {
+            width: 60px;
+        }
+        
+        .table th:nth-child(4) {
+            width: 60px;
+        }
+        
+        .table th:nth-child(5) {
+            width: 70px;
+        }
+        
+        @media (max-width: 480px) {
+            .container-fluid {
+                padding: 8px;
+            }
+            
+            .card {
+                border-radius: 8px;
+            }
+            
+            .table th,
+            .table td {
+                padding: 4px 2px;
+                font-size: 12px;
+            }
+            
+            .table th:nth-child(1) {
+                width: 80px;
+            }
+            
+            .table th:nth-child(2) {
+                width: 55px;
+            }
+            
+            .table th:nth-child(3) {
+                width: 55px;
+            }
+            
+            .table th:nth-child(4) {
+                width: 55px;
+            }
+            
+            .table th:nth-child(5) {
+                width: 60px;
+            }
+            
+            .card-footer {
+                padding: 10px 20px;
+            }
+            
+            .btn {
+                padding: 4px 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <div class="container-fluid">
+        <div class="fund-info">
+            <div>
+                <h2 id="fund-name">--</h2>
+                <small id="fund-id">代码: --</small>
+            </div>
+            <div class="stat-group">
+                <div id="fund-volume" class="stat-item">
+                    <span class="stat-label">成交量:</span>
+                    <span class="stat-value">--</span>
+                </div>
+                <div id="fund-amount-incr" class="stat-item">
+                    <span class="stat-label">场内新增:</span>
+                    <span class="stat-value">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>溢价</th>
+                                <th>东财</th>
+                                <th>涨幅</th>
+                                <th>估算误差</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex align-items-center">
+                    <div class="me-auto">
+                        <div id="pagination" class="pagination"></div>
+                    </div>
+                    <div id="loading-status" class="text-muted">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="tabler/tabler.min.js"></script>
+    <script>
+        let historyData = [];
+        const PAGE_SIZE = 16;
+        let currentPage = 1;
+        const CACHE_KEY = 'history_data_cache_';
+        const CACHE_DURATION = 5 * 60 * 1000;
+        
+        const elements = {};
+        let currentFundId = null;
+        let currentFundName = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            cacheElements();
+            parseUrlParams();
+            loadFromCache();
+            fetchHistoryData();
+        });
+        
+        function cacheElements() {
+            elements.tableBody = document.getElementById('history-table-body');
+            elements.pagination = document.getElementById('pagination');
+            elements.loadingStatus = document.getElementById('loading-status');
+            elements.loadingOverlay = document.getElementById('loading-overlay');
+            elements.fundName = document.getElementById('fund-name');
+            elements.fundId = document.getElementById('fund-id');
+            elements.fundVolume = document.getElementById('fund-volume');
+            elements.fundAmountIncr = document.getElementById('fund-amount-incr');
+        }
+        
+        function updateFundInfo(data) {
+            if (!data || data.length === 0) {
+                return;
+            }
+            const latest = data[0];
+            const volumeValue = elements.fundVolume.querySelector('.stat-value');
+            const amountIncrValue = elements.fundAmountIncr.querySelector('.stat-value');
+            if (volumeValue) {
+                volumeValue.textContent = (latest.volume != null ? latest.volume.toFixed(0) : '--') + ' 万元';
+            }
+            if (amountIncrValue) {
+                amountIncrValue.textContent = (latest.amount_incr != null ? latest.amount_incr.toFixed(0) : '--') + ' 万份';
+            }
+        }
+        
+        function parseUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            currentFundId = params.get('fund_id');
+            currentFundName = params.get('fund_name');
+            
+            if (currentFundId) {
+                elements.fundId.textContent = '代码: ' + currentFundId;
+            }
+            if (currentFundName) {
+                elements.fundName.textContent = currentFundName;
+            }
+        }
+        
+        function showLoading() {
+            elements.loadingOverlay.classList.add('active');
+        }
+        
+        function hideLoading() {
+            elements.loadingOverlay.classList.remove('active');
+        }
+        
+        function saveToCache(data) {
+            const cacheKey = CACHE_KEY + currentFundId;
+            const cacheData = {
+                data: data,
+                timestamp: Date.now()
+            };
+            try {
+                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+            } catch (e) {
+                console.error('缓存保存失败:', e);
+            }
+        }
+        
+        function loadFromCache() {
+            const cacheKey = CACHE_KEY + currentFundId;
+            try {
+                const cachedData = localStorage.getItem(cacheKey);
+                if (cachedData) {
+                    const parsedData = JSON.parse(cachedData);
+                    const now = Date.now();
+                    if (now - parsedData.timestamp < CACHE_DURATION) {
+                        historyData = parsedData.data;
+                        renderTable(historyData);
+                        updateFundInfo(historyData);
+                        elements.loadingStatus.textContent = `共 ${historyData.length} 条 (缓存)`;
+                        elements.loadingStatus.className = 'text-success';
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error('缓存加载失败:', e);
+            }
+            return false;
+        }
+        
+        async function fetchHistoryData() {
+            const days = -90;
+            elements.loadingStatus.textContent = '加载中...';
+            elements.loadingStatus.className = 'text-muted';
+            
+            if (!currentFundId) {
+                elements.loadingStatus.textContent = '缺少基金代码';
+                elements.loadingStatus.className = 'text-danger';
+                return;
+            }
+            
+            try {
+                showLoading();
+                const response = await fetch(`/api/history_rt?authorize_user=august&days=${days}&fund_id=${currentFundId}`);
+                const data = await response.json();
+                
+                if (data.code === 0 && data.data) {
+                    historyData = data.data;
+                    saveToCache(historyData);
+                    renderTable(historyData);
+                    updateFundInfo(historyData);
+                    elements.loadingStatus.textContent = `共 ${historyData.length} 条`;
+                    elements.loadingStatus.className = 'text-success';
+                } else {
+                    throw new Error('数据格式错误');
+                }
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                elements.loadingStatus.textContent = '加载失败';
+                elements.loadingStatus.className = 'text-danger';
+                if (!historyData.length) {
+                    loadFromCache();
+                }
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function renderTable(data) {
+            const fragment = document.createDocumentFragment();
+            
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const end = start + PAGE_SIZE;
+            const pageData = data.slice(start, end);
+            
+            pageData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${item.amount_dt}</td>
+                    <td class="${item.discount_rt >= 0 ? 'text-danger' : 'text-success'}">${item.discount_rt.toFixed(2)}%</td>
+                    <td class="${item.eastmoney_rt >= 0 ? 'text-danger' : 'text-success'}">${item.eastmoney_rt.toFixed(2)}%</td>
+                    <td class="${item.increase_rt >= 0 ? 'text-danger' : 'text-success'}">${item.increase_rt.toFixed(2)}%</td>
+                    <td class="${item.estimate_error >= 0 ? 'text-danger' : 'text-success'}">${(item.estimate_error || 0).toFixed(2)}%</td>
+                `;
+                
+                fragment.appendChild(row);
+            });
+            
+            elements.tableBody.innerHTML = '';
+            elements.tableBody.appendChild(fragment);
+            
+            updatePagination(data.length);
+        }
+        
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+            
+            elements.pagination.innerHTML = `
+                <div class="d-flex align-items-center space-x-4">
+                    <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})" class="btn btn-sm btn-outline-secondary">
+                        上一页
+                    </button>
+                    <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})" class="btn btn-sm btn-outline-secondary">
+                        下一页
+                    </button>
+                </div>
+            `;
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            renderTable(historyData);
+        }
+    </script>
+</body>
+</html>

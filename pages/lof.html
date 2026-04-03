@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="基金溢价数据实时监控">
+    <meta name="description" content="基金实时溢价">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>基金溢价数据</title>
+    <title>基金实时溢价</title>
     
     <link rel="dns-prefetch" href="//192.168.32.99">
     <link rel="preconnect" href="http://192.168.32.99:12316">
@@ -275,7 +275,7 @@
         }
         
         .table-hover tbody tr:nth-child(odd) {
-            background-color: #ffffff;
+            background-color: var(--card-background);
         }
         
         .table-hover tbody tr:hover {
@@ -534,7 +534,6 @@
     </style>
 </head>
 <body>
-    <!-- 加载遮罩 -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-spinner"></div>
     </div>
@@ -570,7 +569,6 @@
                             </tr>
                         </thead>
                         <tbody id="fund-table-body">
-                            <!-- 数据将通过 JavaScript 动态填充 -->
                         </tbody>
                     </table>
                 </div>
@@ -586,7 +584,6 @@
         </div>
     </div>
 
-    <!-- 本地资源 -->
     <script src="tabler/tabler.min.js"></script>
     <script>
         let fundData = [];
@@ -683,8 +680,9 @@
                     const now = Date.now();
                     if (now - parsedData.timestamp < CACHE_DURATION) {
                         fundData = parsedData.data;
-                        renderTable(fundData);
-                        elements.loadingStatus.textContent = `共 ${fundData.length} 条 (缓存)`;
+                        const filteredData = filterPausedFunds(fundData);
+                        renderTable(filteredData);
+                        elements.loadingStatus.textContent = `共 ${filteredData.length} 条 (缓存)`;
                         elements.loadingStatus.className = 'text-success';
                         return true;
                     }
@@ -693,6 +691,10 @@
                 console.error('缓存加载失败:', e);
             }
             return false;
+        }
+
+        function filterPausedFunds(data) {
+            return data.filter(fund => fund.apply_status !== '暂停申购');
         }
 
         async function fetchFundData() {
@@ -707,8 +709,9 @@
                 if (data.code === 0 && data.data) {
                     fundData = data.data;
                     saveToCache(fundData);
-                    renderTable(fundData);
-                    elements.loadingStatus.textContent = `共 ${fundData.length} 条`;
+                    const filteredData = filterPausedFunds(fundData);
+                    renderTable(filteredData);
+                    elements.loadingStatus.textContent = `共 ${filteredData.length} 条`;
                     elements.loadingStatus.className = 'text-success';
                 } else {
                     throw new Error('数据格式错误');
@@ -736,8 +739,29 @@
                 const row = document.createElement('tr');
                 const status = fund.apply_status === '开放申购' ? '' : (fund.apply_status || fund.status || '-');
                 
+                row.style.cursor = 'pointer';
+                
+                const navigateToDetail = (e) => {
+                    const clickedCell = e.target.closest('td');
+                    if (clickedCell && clickedCell.cellIndex === 0) {
+                        return;
+                    }
+                    const url = `lof_detail.html?fund_id=${encodeURIComponent(fund.fund_id)}&fund_name=${encodeURIComponent(fund.fund_nm)}`;
+                    window.location.href = url;
+                };
+                
+                row.addEventListener('click', navigateToDetail);
+                row.addEventListener('touchend', (e) => {
+                    const clickedCell = e.target.closest('td');
+                    if (clickedCell && clickedCell.cellIndex === 0) {
+                        return;
+                    }
+                    e.preventDefault();
+                    navigateToDetail(e);
+                });
+                
                 row.innerHTML = `
-                    <td>${fund.fund_id}</td>
+                    <td style="cursor: text; user-select: text;">${fund.fund_id}</td>
                     <td>${fund.fund_nm}</td>
                     <td class="${fund.discount_rt >= 0 ? 'text-danger' : 'text-success'}">${fund.discount_rt.toFixed(2)}%</td>
                     <td class="${fund.eastmoney_rt >= 0 ? 'text-danger' : 'text-success'}">${fund.eastmoney_rt.toFixed(2)}%</td>
@@ -768,10 +792,14 @@
                 </div>
             `;
         }
-        
-        function changePage(page) {
-            currentPage = page;
-            renderTable(fundData);
+
+        function getDisplayData(searchTerm) {
+            if (!searchTerm) {
+                return filterPausedFunds(fundData);
+            }
+            return fundData.filter(fund => {
+                return fund.fund_id.toLowerCase().includes(searchTerm.toLowerCase());
+            });
         }
 
         function sortTable(field) {
@@ -784,7 +812,10 @@
                 currentSortDirection = 'asc';
             }
 
-            const sortedData = [...fundData].sort((a, b) => {
+            const searchTerm = elements.searchInput.value.trim();
+            const dataToSort = getDisplayData(searchTerm);
+            
+            const sortedData = [...dataToSort].sort((a, b) => {
                 const aValue = a[field];
                 const bValue = b[field];
                 
@@ -805,21 +836,25 @@
             currentSortHeader.className = currentSortDirection === 'asc' ? 'fa fa-sort-asc' : 'fa fa-sort-desc';
 
             renderTable(sortedData);
+            elements.loadingStatus.textContent = `共 ${sortedData.length} 条`;
+            elements.loadingStatus.className = 'text-success';
         }
 
         function searchFunds(searchTerm) {
             currentPage = 1;
             
-            if (!searchTerm) {
-                renderTable(fundData);
-                return;
-            }
+            const displayData = getDisplayData(searchTerm);
             
-            const filteredData = fundData.filter(fund => {
-                return fund.fund_id.toLowerCase().includes(searchTerm.toLowerCase());
-            });
-            
-            renderTable(filteredData);
+            renderTable(displayData);
+            elements.loadingStatus.textContent = `共 ${displayData.length} 条`;
+            elements.loadingStatus.className = 'text-success';
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            const searchTerm = elements.searchInput.value.trim();
+            const displayData = getDisplayData(searchTerm);
+            renderTable(displayData);
         }
     </script>
 </body>
