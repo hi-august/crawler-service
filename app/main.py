@@ -27,17 +27,17 @@ state_mgr = StateManager()
 async def lifespan(app: FastAPI):
     """应用生命周期管理，启动和停止定时调度器"""
     # 启动时加载状态已在 StateManager 初始化时完成
-    # scheduler = BackgroundScheduler()
-    # scheduler.add_job(
-    #     xiaodigu.crawl,
-    #     trigger=IntervalTrigger(seconds=CRAWLER_INTERVAL_SECONDS),
-    #     id='xiaodigu_crawler',
-    #     replace_existing=True
-    # )
-    # scheduler.start()
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        xiaodigu.crawl,
+        trigger=IntervalTrigger(seconds=CRAWLER_INTERVAL_SECONDS),
+        id='xiaodigu_crawler',
+        replace_existing=True
+    )
+    scheduler.start()
     cron_log.info(f"调度器已启动，每{CRAWLER_INTERVAL_SECONDS}秒执行一次小嘀咕爬虫")
     yield
-    # scheduler.shutdown()
+    scheduler.shutdown()
     cron_log.info("应用关闭，调度器已停止")
 
 
