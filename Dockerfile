@@ -31,9 +31,6 @@ WORKDIR /app
 # 从 builder 阶段复制虚拟环境
 COPY --from=builder /venv /venv
 
-# 复制项目代码
-COPY . .
-
 # 创建数据目录
 RUN mkdir -p /data
 
