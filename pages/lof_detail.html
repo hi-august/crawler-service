@@ -40,20 +40,20 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background-color);
             margin: 0;
-            padding: 0;
+            padding: 0 0 20px 0;
             color: var(--text-color);
             line-height: 1.5;
         }
         
         .container-fluid {
-            padding: 10px 20px;
+            padding: 10px 20px 20px 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
         
         @media (min-width: 768px) {
             .container-fluid {
-                padding: 20px 30px;
+                padding: 20px 30px 30px 30px;
             }
         }
         
@@ -67,32 +67,35 @@
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 15px 20px;
-            margin-bottom: 10px;
+            margin-bottom: 4.99px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
-            line-height: 1.112;
+            gap: 3.23px;
+            line-height: 1.056;
+            letter-spacing: -0.041184em;
         }
         
         .fund-info h2 {
-            margin: 0 0 6px 0;
+            margin: 0 0 1.94px 0;
             font-size: 18px;
             color: var(--text-color);
-            margin-right: 12px;
-            line-height: 1.112;
+            margin-right: 3.87px;
+            line-height: 1.056;
+            letter-spacing: -0.041184em;
         }
         
         .fund-info small {
             color: var(--text-muted);
             font-size: 14px;
-            line-height: 1.112;
+            line-height: 1.056;
+            letter-spacing: -0.041184em;
         }
         
         .fund-info .stat-group {
             display: flex;
-            gap: 20px;
+            gap: 6.45px;
             align-items: center;
         }
         
@@ -100,19 +103,22 @@
             display: flex;
             align-items: center;
             font-size: 14px;
-            line-height: 1.112;
+            line-height: 1.056;
+            letter-spacing: -0.041184em;
         }
         
         .fund-info .stat-label {
             font-weight: 500;
             color: var(--text-color);
             white-space: nowrap;
+            letter-spacing: -0.041184em;
         }
         
         .fund-info .stat-value {
             font-weight: 600;
             color: var(--primary-color);
-            margin-left: 4px;
+            margin-left: 1.29px;
+            letter-spacing: -0.041184em;
         }
         
         .card {
@@ -377,6 +383,39 @@
             }
         }
         
+        @media (max-width: 768px) {
+            .fund-info .stat-group {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .fund-info .stat-item {
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .fund-info {
+                padding: 12px 14px;
+            }
+            
+            .fund-info h2 {
+                font-size: 16px;
+            }
+            
+            .fund-info small {
+                font-size: 12px;
+            }
+            
+            .fund-info .stat-group {
+                gap: 10px;
+            }
+            
+            .fund-info .stat-item {
+                font-size: 12px;
+            }
+        }
+        
         .table th:nth-child(1) {
             width: 90px;
         }
@@ -463,6 +502,10 @@
                     <span class="stat-label">场内新增:</span>
                     <span class="stat-value">--</span>
                 </div>
+                <div id="fund-updated-time" class="stat-item">
+                    <span class="stat-label">更新时间:</span>
+                    <span class="stat-value">--</span>
+                </div>
             </div>
         </div>
         
@@ -523,6 +566,7 @@
             elements.fundId = document.getElementById('fund-id');
             elements.fundVolume = document.getElementById('fund-volume');
             elements.fundAmountIncr = document.getElementById('fund-amount-incr');
+            elements.fundUpdatedTime = document.getElementById('fund-updated-time');
         }
         
         function updateFundInfo(data) {
@@ -532,11 +576,36 @@
             const latest = data[0];
             const volumeValue = elements.fundVolume.querySelector('.stat-value');
             const amountIncrValue = elements.fundAmountIncr.querySelector('.stat-value');
+            const updatedTimeValue = elements.fundUpdatedTime.querySelector('.stat-value');
             if (volumeValue) {
                 volumeValue.textContent = (latest.volume != null ? latest.volume.toFixed(0) : '--') + ' 万元';
             }
             if (amountIncrValue) {
-                amountIncrValue.textContent = (latest.amount_incr != null ? latest.amount_incr.toFixed(0) : '--') + ' 万份';
+                const amountIncr = latest.amount_incr;
+                amountIncrValue.textContent = (amountIncr != null ? amountIncr.toFixed(0) : '--') + ' 万份';
+                if (amountIncr != null) {
+                    amountIncrValue.className = 'stat-value ' + (amountIncr >= 0 ? 'text-danger' : 'text-success');
+                }
+            }
+            if (updatedTimeValue) {
+                const dateStr = latest.amount_dt;
+                let displayTime = '';
+                if (latest.updated_time != null && latest.updated_time > 86400) {
+                    const timestamp = latest.updated_time;
+                    const date = new Date(timestamp > 10000000000 ? timestamp : timestamp * 1000);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    displayTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                } else if (dateStr) {
+                    displayTime = dateStr;
+                }
+                if (displayTime) {
+                    updatedTimeValue.textContent = displayTime;
+                }
             }
         }
         
