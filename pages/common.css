@@ -1,0 +1,218 @@
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #64748b;
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --background-color: #f8fafc;
+    --card-background: #ffffff;
+    --border-color: #e5e7eb;
+    --text-color: #1e293b;
+    --text-muted: #6b7280;
+    --row-even-bg: #f9fafb;
+    --row-hover-bg: #f1f5f9;
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0 0 20px 0;
+    color: var(--text-color);
+    line-height: 1.5;
+}
+
+.container-fluid {
+    padding: 6px 20px 20px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .container-fluid {
+        padding: 6px 30px 30px 30px;
+    }
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-soft);
+}
+
+.card-body {
+    padding: 0;
+}
+
+.card-footer {
+    background-color: var(--card-background);
+    padding: 10px 16px;
+    font-size: 13px;
+    border-top: 1px solid var(--border-color);
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+@media (min-width: 768px) {
+    .card-footer {
+        padding: 15px 25px;
+    }
+}
+
+.table-responsive {
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0;
+    font-size: 14px;
+    table-layout: fixed;
+}
+
+@media (min-width: 768px) {
+    .table {
+        font-size: 16px;
+    }
+}
+
+.table th {
+    background-color: var(--card-background);
+    font-weight: 600;
+    padding: 10px 4px;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+}
+
+@media (min-width: 768px) {
+    .table th {
+        padding: 10px 8px;
+        font-size: 15px;
+    }
+}
+
+.table th:first-child {
+    text-align: center;
+}
+
+.table th:hover {
+    background-color: var(--row-hover-bg);
+}
+
+.table td {
+    padding: 7px 4px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 0.15s ease;
+    font-weight: 400;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .table td {
+        padding: 10px 8px;
+    }
+}
+
+.table-hover tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table-hover tbody tr:nth-child(even) {
+    background-color: var(--row-even-bg);
+}
+
+.table-hover tbody tr:nth-child(odd) {
+    background-color: var(--card-background);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--row-hover-bg);
+}
+
+.text-success {
+    color: var(--success-color) !important;
+    font-weight: 600;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+    font-weight: 600;
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.sortable:hover {
+    background-color: var(--row-hover-bg);
+}
+
+.sortable i {
+    margin-left: 8px;
+    font-size: 11px;
+    opacity: 0.5;
+}
+
+.sortable:hover i {
+    opacity: 1;
+}
+
+.pagination {
+    font-size: 13px;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loading-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
