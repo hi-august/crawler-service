@@ -8,7 +8,7 @@ from app.core.http_client import httpx_post
 from app.config import NOTIFY_SERVICE_URL
 
 
-def notify_wechat(msg: str, strategy_type: str = 'others', touser: List[str] = None):
+def notify_wechat(msg: str, strategy_type: str = 'other_service', touser: List[str] = None):
     """
     通过远程通知服务发送企业微信消息
     :param msg: 消息内容
