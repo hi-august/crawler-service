@@ -27,13 +27,15 @@
   --gold: #fbbf24;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
+/* 全局字号放大到 120%（整体 UI 等比放大）*/
+html { zoom: 1.2; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", monospace;
   background: var(--bg-primary);
   color: var(--text-primary);
   display: flex;
   height: 100vh;
-  overflow: hidden;
+  overflow: auto;
 }
 
 /* --- SIDEBAR --- */
